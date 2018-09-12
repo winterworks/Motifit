@@ -18,3 +18,7 @@ Phothons:
 
 All the data will be saved on the phothons themselves.
 
+## Current example in Aarhus
+On the campus there is already a similar idea used to promote biking:
+
+<img src="https://github.com/winterworks/Motifit/blob/master/bikes.jpg" width="512">
