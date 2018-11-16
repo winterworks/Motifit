@@ -1,4 +1,3 @@
-#include <MQTT.h>
 #include "IQTTFunctions.h"
 
 int led0 = D1;
@@ -6,7 +5,7 @@ int infraredDetector = A1;
 bool hasDisplay;
 bool hasDetector;
 
-int peopleCount = 0;
+long peopleCount = 0;
 int checkDetectorInterval = 5000;
 
 void setup() {
