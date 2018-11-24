@@ -1,32 +1,39 @@
 #include "IQTTFunctions.h"
 
-int led0 = D1;
-int infraredDetector = A1;
-bool hasDisplay;
-bool hasDetector;
-
-long peopleCount = 0;
+long passCount = 0;
 int checkDetectorInterval = 5000;
+int infraredDetector = A1;
+void callback(char* topic, byte* payload, unsigned int length);
+MQTT client("iot.eclipse.org", 1883, callback);
+
+void callback(char* topic, byte* payload, unsigned int length) {
+    char p[length + 1];
+    memcpy(p, payload, length);
+    p[length] = NULL;
+
+    Particle.publish("MQTT receive:", p);
+}
 
 void setup() {
-  Serial.begin(9600);
-  Serial.println("started");
-  hasDisplay = false; // Detect if this photon has a display
-  hasDetector = true; // Detect if this photon has a detector
-
-  setupMqtt(hasDisplay);
+  // MQTT code from: https://github.com/hirotakaster/MQTT
+  // connect to the server(unique id by Time.now()) and subscribe
+  client.connect("mf_" + String(Time.now()));
+  if (client.isConnected()) {
+      Particle.publish("client connected", "yes");
+      client.subscribe("mf-status");
+  }
 }
 
 void loop() {
-  // Read the infrared detector and convert result to a bool
+  Particle.publish("Input value:", String(analogRead(infraredDetector)));
+  // Publis the detected result to the Particle console
   bool detecting = analogRead(infraredDetector) > 300;
-  if (detecting) {
-    peopleCount++;
-  }
-  // Particle.publish("read", String(analogRead(infraredDetector)));
   if (client.isConnected()) {
       client.loop();
-      client.publish("mf-count", String(peopleCount));
+      if (detecting) {
+          passCount++;
+      }
+      client.publish("mf-status", String(passCount));
   }
-  delay(checkDetectorInterval);
+   delay(checkDetectorInterval);
 }
