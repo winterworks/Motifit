@@ -7,11 +7,14 @@ long passCount = 0;
 int checkDetectorInterval = 10;
 int detectingStep = 0;
 int detectingStepSerialCount = 0;
+
+int minDetectionTime = 150;
+int maxDetectionTime = 330;
 // Used pins
 int infraredDetector = A1;
 int buttonInput = 2;
-// Variable for setting the sleep time and lenght
-int sleepNightSeconds = 60*60*30;
+// Variable for setting the sleep time and lenght (7 hours for default)
+int sleepNightSeconds = 60*60*7;
 int bedTimeHour = 23;
 // Callback for MQTT
 void callback(char* topic, byte* payload, unsigned int length);
@@ -56,7 +59,7 @@ void checkBedTime(){
     if (Time.format(Time.now(), "%H").toInt() == bedTimeHour) {
         System.sleep(SLEEP_MODE_DEEP,sleepNightSeconds);
     }
-    // TODO add an option to also disable the photon in the weekends
+    // Optional: add an option to also disable the photon in the weekends
 }
 
 void detect(){
@@ -65,13 +68,13 @@ void detect(){
     if (detecting) {
         if (detectingStepSerialCount < 5) {
             detectingStep++;
-            if(detectingStep == 15){
+            if(detectingStep == minDetectionTime){
                 increaseLogCount();
                 detectingStepSerialCount++;
                 // Debugging line for checking the passCount before sending it over MQTT
                 publishValue();
             }
-            if(detectingStep > 30){
+            if(detectingStep > maxDetectionTime){
                 // Detected long enough restart it
                 detectingStep = 0;
             }
